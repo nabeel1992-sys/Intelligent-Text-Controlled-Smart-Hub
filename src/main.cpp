@@ -5,6 +5,8 @@
 #include "web_server.h"
 #include "live_data.h"
 
+#ifndef PIO_UNIT_TESTING
+
 void setup() {
     Serial.begin(115200);
     
@@ -35,3 +37,5 @@ void loop() {
     server.handleClient();
     handleLiveData();
 }
+
+#endif
