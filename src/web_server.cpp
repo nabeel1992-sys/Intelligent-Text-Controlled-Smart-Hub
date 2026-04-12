@@ -15,22 +15,13 @@ extern void blinkConfirm();
 void handleRoot() {
     if (apMode) {
         // In AP mode, serve the Wi-Fi setup portal
-        File f = SPIFFS.open("/wifi.html", "r");
-        if (!f) {
-            server.send(500, "text/plain", "wifi.html missing");
-            return;
-        }
-        server.streamFile(f, "text/html");
-        f.close();
+        File file = SPIFFS.open("/wifi.html", "r");
+        server.streamFile(file, "text/html");
+        file.close();
     } else {
-        // In Station mode, serve the main dashboard
-        File f = SPIFFS.open("/index.html", "r");
-        if (!f) {
-            server.send(500, "text/plain", "index.html missing");
-            return;
-        }
-        server.streamFile(f, "text/html");
-        f.close();
+        File file = SPIFFS.open("/index.html", "r");
+        server.streamFile(file, "text/html");
+        file.close();
     }
 }
 
@@ -40,34 +31,60 @@ void handleSaveWifi() {
         server.send(405, "text/plain", "Method Not Allowed");
         return;
     }
-    
     String ssid = server.arg("ssid");
     String pass = server.arg("pass");
-    
+
     if (ssid.length() == 0) {
         server.send(400, "text/plain", "SSID required");
         return;
     }
-    
+
     Preferences prefs;
     prefs.begin("wifi", false);
     prefs.putString("ssid", ssid);
     prefs.putString("pass", pass);
     prefs.end();
-    
-    server.send(200, "text/plain", "Saved. Rebooting...");
-    broadcastLog("Wi-Fi credentials saved. Rebooting...");
-    delay(500);
+
+    server.send(200, "text/html", "<h1>Saved! Rebooting...</h1>");
+    delay(2000);
     ESP.restart();
 }
 
-// 3. Function to setup all URL routes and initialize the OTA system
-void setupWebServer() {
-    // Dynamic root route depending on the current Wi-Fi mode
-    server.on("/", HTTP_GET, handleRoot);
+// 3. Function to save Gemini API Key to Flash Memory
+void handleSaveApiKey() {
+    if (server.method() != HTTP_POST) {
+        server.send(405, "text/plain", "Method Not Allowed");
+        return;
+    }
+    String apiKey = server.arg("apikey");
     
-    // OTA firmware upload routes
+    Preferences prefs;
+    prefs.begin("ai_settings", false); // false = Read/Write mode
+    prefs.putString("gemini_key", apiKey);
+    prefs.end();
+    
+    server.send(200, "text/plain", "API Key Saved Securely!");
+    broadcastLog("🔑 API Key securely saved in ESP32 Flash Memory!");
+}
+
+// 4. Function to retrieve Gemini API Key from Flash Memory
+void handleGetApiKey() {
+    Preferences prefs;
+    prefs.begin("ai_settings", true); // true = Read Only mode
+    String key = prefs.getString("gemini_key", "");
+    prefs.end();
+    
+    server.send(200, "text/plain", key);
+}
+
+// 5. Main Setup Function for Web Server
+void setupWebServer() {
+    // Serve static files
+    server.on("/", HTTP_GET, handleRoot);
+
+    // OTA Update Routes
     server.on("/update", HTTP_POST, []() {
+        server.sendHeader("Connection", "close");
         server.send(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
         blinkConfirm();
         ESP.restart();
@@ -90,10 +107,14 @@ void setupWebServer() {
             }
         }
     });
-    
-    // Route to save credentials (called by wifi.html)
+
+    // Route to save Wi-Fi credentials (called by wifi.html)
     server.on("/save", HTTP_POST, handleSaveWifi);
-    
+
+    // NAYE ROUTES: Secure API Key handling
+    server.on("/save-api", HTTP_POST, handleSaveApiKey);
+    server.on("/get-api", HTTP_GET, handleGetApiKey);
+
     // Handle 404 Not Found (redirect to portal if in AP mode)
     server.onNotFound([]() {
         if (apMode) {
@@ -102,7 +123,6 @@ void setupWebServer() {
             server.send(404, "text/plain", "Not found");
         }
     });
-    
-    // Start the web server
+
     server.begin();
 }
