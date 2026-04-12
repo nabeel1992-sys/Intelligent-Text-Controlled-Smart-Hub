@@ -23,12 +23,16 @@ void setup() {
     // Try to connect to Wi-Fi. If it fails, start the Setup Hotspot
     if (ssid == "" || !connectSTA(ssid, pass)) {
         startAP();
+    } else {
+        // Agar connect ho jaye toh IP Address print karo
+        Serial.println();
+        Serial.print("✅ Wi-Fi Connected! IP Address: ");
+        Serial.println(WiFi.localIP()); 
     }
 
     // Initialize our modular layers
     setupWebServer();
     setupWebSockets();
-    
     Serial.println("System Boot Complete!");
 }
 
@@ -37,5 +41,4 @@ void loop() {
     server.handleClient();
     handleLiveData();
 }
-
 #endif
