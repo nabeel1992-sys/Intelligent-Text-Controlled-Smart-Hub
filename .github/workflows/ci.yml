@@ -41,4 +41,4 @@ jobs:
           DEVICE_IP: ${{ secrets.DEVICE_IP }} 
         run: |
           echo "Uploading firmware to ESP32 at $DEVICE_IP..."
-          curl -F "update=@.pio/build/esp32s3_devkit/firmware.bin" http://$DEVICE_IP/update
+          curl.exe -F "update=@.pio/build/esp32s3_devkit/firmware.bin" http://$env:DEVICE_IP/update
