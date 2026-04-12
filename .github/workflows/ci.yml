@@ -1,25 +1,44 @@
-name: PlatformIO CI Build
+name: PlatformIO CI/CD Pipeline
 
-
+# This workflow runs whenever you push code or create a pull request
 on: [push, pull_request]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest 
+  build-and-deploy:
+    # IMPORTANT: If your ESP32 is on a local home Wi-Fi (e.g., 192.168.1.x), 
+    # GitHub's cloud servers cannot reach it directly. 
+    # You should install a GitHub Runner on your own PC and change 'ubuntu-latest' to 'self-hosted'.
+    runs-on: self-hosted
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v3
+      # Step 1: Download your code from the GitHub repository
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
+      # Step 2: Install Python (Required to run PlatformIO)
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
 
-    - name: Install PlatformIO
-      run: |
-        python -m pip install --upgrade pip
-        pip install -U platformio
+      # Step 3: Install PlatformIO core to compile the C++ code
+      - name: Install PlatformIO
+        run: |
+          python -m pip install --upgrade pip
+          pip install -U platformio
 
-    - name: Build Firmware for ESP32-S3
-      run: pio run
+      # Step 4: Compile the firmware specifically for your ESP32-S3 board
+      - name: Build Firmware for ESP32-S3
+        run: pio run -e esp32s3_devkit
+
+      # Step 5: Continuous Deployment (CD) - Upload via local OTA
+      # This curl command matches the "/update" route defined in your web_server.cpp
+      - name: Deploy Firmware via OTA (CD)
+        # Only run deployment if the code was pushed to the main branch
+        if: github.ref == 'refs/heads/main' 
+        env:
+          # Keep your ESP32's IP address safe using GitHub Secrets
+          DEVICE_IP: ${{ secrets.DEVICE_IP }} 
+        run: |
+          echo "Uploading firmware to ESP32 at $DEVICE_IP..."
+          curl -F "update=@.pio/build/esp32s3_devkit/firmware.bin" http://$DEVICE_IP/update
