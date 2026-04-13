@@ -52,7 +52,7 @@ The codebase follows a modular C++ architecture for high maintainability:
 ### 2. Clone and Build
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/Aura-AI-Smart-Hub.git
+   git clone https://github.com/nabeel1992-sys/Intelligent-Text-Controlled-Smart-Hub
 Open the project folder in VS Code. PlatformIO will automatically download the required libraries (WebSockets, Adafruit GFX, Adafruit SSD1306, DHT sensor library).
 Connect your ESP32-S3 via USB.
 3. Upload Web Files (SPIFFS)
