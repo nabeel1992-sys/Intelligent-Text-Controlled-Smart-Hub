@@ -12,5 +12,6 @@ void setupWebSockets();
 void handleLiveData();
 void broadcastLog(const String& msg);
 void blinkConfirm();
+void sendSystemStatus(); 
 
 #endif

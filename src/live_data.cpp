@@ -36,6 +36,7 @@ String getFormattedUptime() {
 // Function to send logs to Serial Monitor and Web Dashboard
 void broadcastLog(const String& msg) {
     Serial.println(msg); 
+    String tempMsg = msg; 
     webSocket.broadcastTXT(msg); 
 }
 
