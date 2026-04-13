@@ -63,7 +63,7 @@ void updateOLEDDashboard(String ip, float temp, float hum, long rssi, String upt
     // Bottom Bar (Hardware Status)
     display.drawLine(0, 54, 128, 54, SSD1306_WHITE);
     display.setCursor(0, 56);
-    display.print("Relay (D4): ");
+    display.print("Fan (D4): ");
     display.println(relayState ? "ON" : "OFF");
 
     display.display();
