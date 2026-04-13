@@ -78,7 +78,7 @@ void sendSystemStatus() {
     broadcastLog(String(buffer)); // Send to browser
 
     // Send data to modular OLED display
-    updateOLEDDashboard(WiFi.localIP().toString(), temp, hum, rssi, uptime, digitalRead(EXTERNAL_LED));
+    updateOLEDDashboard(WiFi.localIP().toString(), t, h, r, up, digitalRead(EXTERNAL_LED));
   }
 }
 
