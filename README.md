@@ -1,258 +1,84 @@
-# OTA-IOT (ESP32S3 + SPIFFS + OTA + WebSocket)
+# 🤖 Aura AI Smart Hub
 
-Firmware developed for ESP32-S3 supporting:
+![Platform](https://img.shields.io/badge/Platform-ESP32--S3-blue)
+![Framework](https://img.shields.io/badge/Framework-Arduino%20(PlatformIO)-orange)
+![Features](https://img.shields.io/badge/Features-OTA%20%7C%20WebSockets%20%7C%20Gemini%20AI-success)
 
-- Firmware update via **OTA** (Over-The-Air)
-- Web interface hosted on **SPIFFS**
-- Real-time communication using **WebSocket**
-- Automatic upload of the file system before firmware upload
-- LED feedback for system status and OTA confirmation
-
-This project serves as a base for IoT applications that require remote control, a local web interface, and OTA firmware updates.
+Aura AI Smart Hub is a production-grade, full-stack Embedded IoT dashboard built on the **ESP32-S3** architecture. It features a real-time bidirectional web dashboard, live OLED hardware status, embedded Gemini AI, and a fully automated Over-The-Air (OTA) CI/CD deployment pipeline.
 
 ---
 
-## ⚙️ Requirements
+## ✨ Key Features
 
-- **VS Code** with the [PlatformIO IDE extension](https://platformio.org/install/ide?install=vscode)
-- **Supported board:** ESP32-S3 (example: *Seeed Studio XIAO ESP32S3*)
-- **Framework:** Arduino
-- **Required library:**
-  - [WebSockets by Links2004](https://registry.platformio.org/libraries/links2004/WebSockets)
-
----
-
-## 📂 Project Structure
-
-```
-OTA-IOT/
- ┣ 📂 data/                → Files stored in the SPIFFS filesystem
- ┃ ┣ index.html            → Main dashboard: controls LED, displays logs, and system info.
- ┃ ┗ wifi.html             → Wi-Fi setup page: allows users to enter SSID and password manually.
- ┣ 📂 src/
- ┃ ┗ main.cpp              → Main firmware source code
- ┣ 📄 extra_script.py       → Script to automatically upload SPIFFS before firmware
- ┣ 📄 platformio.ini        → PlatformIO configuration file
- ┗ 📄 .gitignore
-```
+* **🌐 Embedded Async Web Server:** Hosts a responsive, beautifully designed HTML/CSS/JS dashboard directly from the ESP32's internal SPIFFS memory.
+* **⚡ Real-Time Telemetry:** Uses **WebSockets** for zero-delay, bidirectional communication to push DHT11 sensor data (Temp/Humidity) and receive hardware control commands.
+* **📺 Modular OLED Engine:** Real-time physical visualization of IP Address, Wi-Fi Signal (RSSI), Uptime, and Relay Status via an I2C OLED display.
+* **☁️ Gemini AI Integration:** Chat with Google's Gemini AI directly from the local dashboard. API keys are securely managed and stored in Non-Volatile Storage (NVS).
+* **🔄 Smart Wi-Fi Provisioning:** Features an auto-failover mechanism. If the saved Wi-Fi is unavailable, it automatically boots into AP (Access Point) mode (`ESP32_Setup`) to serve a captive portal for network configuration.
+* **🚀 OTA & CI/CD Pipeline:** Supports local OTA updates via the browser. Additionally, a **GitHub Actions** CI/CD pipeline is integrated to automatically build and deploy firmware over-the-air upon every `git push`.
+* **🛡️ Auto-Recovery UI:** The web dashboard features auto-reconnect and auto-refresh logic to seamlessly handle device reboots during OTA updates.
 
 ---
 
-## 🚀 How to Use
+## 🛠️ Hardware Requirements
 
-### 1️⃣ Clone the repository
-
-```bash
-git clone https://github.com/engperini/OTA-IOT.git
-cd OTA-IOT
-```
-
----
-
-### 2️⃣ Open in VS Code
-
-Open the project using VS Code with PlatformIO installed and wait for all dependencies to download automatically.
+| Component | Description | Pin Mapping |
+| :--- | :--- | :--- |
+| **ESP32-S3** | Main Microcontroller | - |
+| **DHT11 Sensor** | Temperature & Humidity Sensor | GPIO 5 |
+| **SSD1306 OLED** | 0.96" I2C Display (128x64) | SDA: 6, SCL: 7 |
+| **Relay / LED** | External Actuator / Indicator | GPIO 4 |
 
 ---
 
-### 3️⃣ Connect your ESP32-S3
+## 📁 Project Architecture
 
-Connect your device via **USB cable** — the **first upload must always be done via cable**.  
-After this initial setup, all future updates can be done **Over-The-Air (OTA)**.
-
-Check that the device is detected as a serial port (e.g., `COM7` or `/dev/ttyUSB0`).
-
----
-
-### 4️⃣ Build and upload
-
-From PlatformIO's left sidebar menu, click **Upload (arrow →)**  
-or use the terminal:
-
-```bash
-pio run -t upload
-```
-
-The `extra_script.py` ensures that SPIFFS is uploaded **before the firmware**.  
-You’ll see messages like:
-
-```
-=== Uploading SPIFFS before firmware ===
-[SUCCESS] SPIFFS done!
-[SUCCESS] Firmware upload complete!
-```
+The codebase follows a modular C++ architecture for high maintainability:
+* `main.cpp` - System boot, NVS initialization, and main super-loop.
+* `wifi_config.h/.cpp` - Handles Station (STA) connection and Access Point (AP) fallback.
+* `web_server.h/.cpp` - Asynchronous HTTP server, routing, and secure API key management.
+* `live_data.h/.cpp` - Sensor readings, WebSockets broadcasting, and hardware control logic.
+* `oled_display.h/.cpp` - Custom I2C display driver for dynamic UI pop-ups and live dashboards.
+* `data/` - Contains the SPIFFS web files (`index.html`, `wifi.html`).
 
 ---
 
-### First Boot (Wi-Fi not configured)
+## 🚀 How to Run & Install
 
-If this is your first time running the firmware, or if Wi-Fi credentials were erased,
-the ESP32-S3 will start in Access Point mode.
+### 1. Prerequisites
+* [VS Code](https://code.visualstudio.com/) with the [PlatformIO](https://platformio.org/) extension installed.
+* ESP32-S3 board and required hardware components.
 
-On your computer or phone, connect to the Wi-Fi network:
-ESP32-Setup
+### 2. Clone and Build
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/Aura-AI-Smart-Hub.git
+Open the project folder in VS Code. PlatformIO will automatically download the required libraries (WebSockets, Adafruit GFX, Adafruit SSD1306, DHT sensor library).
+Connect your ESP32-S3 via USB.
+3. Upload Web Files (SPIFFS)
+Before flashing the firmware, you must upload the web dashboard to the ESP32's memory:
+Click the PlatformIO (Alien) icon in the left sidebar.
+Go to Project Tasks -> esp32s3_devkit -> Platform -> Upload Filesystem Image.
+4. Upload Firmware
+Build and upload the C++ code by clicking the Upload arrow at the bottom of VS Code.
 
-Open your browser and go to:
-```
-http://192.168.4.1
-```
+--------------------------------------------------------------------------------
+⚙️ Initial Setup & Usage
+First Boot: The device will boot into AP mode. Connect your phone/PC to the Wi-Fi network named ESP32_Setup.
+Wi-Fi Config: Navigate to http://192.168.4.1 and enter your home Wi-Fi credentials. The device will reboot and connect to your home network.
+OLED Status: Check the physical OLED screen for the assigned local IP Address.
+Dashboard: Open the IP Address in your browser to access the Aura AI Hub.
+AI Setup: Paste your Gemini API Key in the setup box on the dashboard to activate the AI Assistant.
 
-You’ll see the Wi-Fi setup page (wifi.html) where you can enter your network SSID and password.
+--------------------------------------------------------------------------------
+🤖 CI/CD Automation (GitHub Actions)
+This project is configured with a self-hosted runner. When a commit is pushed to the main branch, the GitHub Action automatically:
+Compiles the firmware via PlatformIO.
+Checks for errors.
+Pushes the .bin file to the ESP32-S3 via an automated OTA web request. (The OLED display dynamically shows the "Downloading..." and "Writing to Flash..." status during this remote update).
 
-After saving, the ESP32-S3 will reboot automatically and connect to your configured Wi-Fi.
-
-### 5️⃣ Access the web interface
-
-After the upload, open the **PlatformIO Serial Monitor**:
-
-```bash
-pio device monitor
-```
-
-You’ll see something like:
-
-```
-Connected to WiFi!
-IP Address: 192.168.1.45
-```
-
-Open a browser and navigate to your ESP’s IP address:
-
-```
-http://192.168.1.45
-```
-
-> 💡 The IP will vary depending on your local Wi-Fi network.
+--------------------------------------------------------------------------------
+📜 License
+This project is licensed under the MIT License. Feel free to use and modify it for your personal or commercial IoT projects.
 
 ---
-
-## 🌐 Web Interface
-
-<p align="center">
-  <img src="images/interface_logs.png" alt="ESP32 Web Interface" width="800"/>
-  <br>
-  <em>Real-time control and OTA via browser</em>
-</p>
-
-
-## 🌐 Features
-
-### `index.html`
-This is the main dashboard page shown when accessing your ESP’s IP address.  
-It provides:
-- LED control (turn ON/OFF);
-- Real-time system logs through WebSocket;
-- System information: internal temperature, Wi-Fi signal strength (RSSI), and uptime;
-- OTA firmware upload with progress bar;
-- Visual connection indicator (WebSocket status);
-- Remote reboot button.
-
-## 🌐 Wifi Setup
-
-<p align="center">
-  <img src="images/wifi_setup.png" alt="ESP32 Wifi Setup" width="800"/>
-  <br>
-  <em>Initial Wifi Setup</em>
-</p>
-
-### `wifi.html`
-This page handles Wi-Fi configuration and is useful when the device has no saved credentials.  
-It allows users to:
-- Scan and select nearby Wi-Fi networks;
-- Enter SSID and password manually;
-- Save and reboot the ESP32-S3 with new credentials.
-
-> This feature is ideal for **Access Point (Hotspot) mode**, automatically enabled if no Wi-Fi credentials and connection is detected on startup. 
-
----
-
-## 🔄 OTA Update
-
-1. Access your device via browser (e.g., `http://192.168.1.45`)
-2. Upload a new `.bin` file (generated during compilation)
-3. The LED will blink three times indicating success
-4. The ESP will automatically restart and run the new firmware
-
-## 🌐 Esp32S3_XIAO
-
-<p align="center">
-  <img src="images/photo_esp32s3_xiao.jpg" alt="ESP32 Used" width="800"/>
-  <br>
-  <em>XIAO Sense Hardware</em>
-</p>
-
----
-
-## 🧠 Automatic SPIFFS Upload (`extra_script.py`)
-
-This script runs automatically before the firmware upload, ensuring your `data/` files are always up to date.
-
-```python
-Import("env")
-from SCons.Script import DefaultEnvironment
-
-def before_upload(source, target, env):
-    print("=== Uploading SPIFFS before firmware ===")
-    spiffs_env = DefaultEnvironment()
-    spiffs_env.Replace(UPLOAD_PORT=env.get("UPLOAD_PORT"))
-    spiffs_env.Replace(UPLOAD_SPEED=env.get("UPLOAD_SPEED"))
-    spiffs_env.Execute("platformio run -t uploadfs")
-
-env.AddPreAction("upload", before_upload)
-```
-
----
-
-## ⚙️ `platformio.ini` Configuration
-
-```ini
-[env:xiao_esp32s3]
-platform = espressif32
-board = seeed_xiao_esp32s3
-framework = arduino
-monitor_speed = 115200
-board_build.filesystem = spiffs
-lib_deps = links2004/WebSockets@^2.7.1
-extra_scripts = extra_script.py
-```
-
----
-
-## 💡 Useful Tips
-
-- If the upload fails, disconnect and reconnect your ESP32-S3.
-- Ensure `index.html` and `wifi.html` are inside the `data/` folder.
-- To manually update only the SPIFFS filesystem:
-  ```bash
-  pio run -t uploadfs
-  ```
-- To open the serial monitor:
-  ```bash
-  pio device monitor
-  ```
-
----
-
-## 📘 Author
-
-**Developed by:** engperini  
-**License:** MIT  
-**Version:** 1.1  
-**Compatible with:** ESP32-S3 (XIAO, DevKit, etc.)
-
----
-
-✨ *A DIY IoT-ready project supporting OTA updates, WebSocket logging, Wi-Fi setup, and local SPIFFS web hosting.*
----
-⭐ **If you find this project useful, give it a star!**  
-Your support helps me improve and share more IoT tools like this.
-
-## 🔮 Future Improvements
-
-Future versions of this project aim to extend its IoT capabilities beyond OTA control and monitoring.  
-A **temperature and pressure sensor** will be integrated to provide environmental data logging in real time.  
-Additionally, the firmware will support a **low-power sleep mode** that can be toggled directly from the web interface.  
-When enabled, the ESP32-S3 will wake up periodically, send sensor data at predefined intervals, and return to deep sleep — optimizing power efficiency.  
-This feature will be particularly useful for remote or solar-powered deployments, where the device can operate autonomously using a **5V solar panel connected via USB**, continuously charging the onboard battery while maintaining data transmission cycles.
-
-
