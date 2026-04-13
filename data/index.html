@@ -92,9 +92,24 @@
                 const h = e.data.match(/Hum:\s*([\d.]+)/);
                 if(t) currentTemp = t[1] + "°C";
                 if(h) currentHum = h[1] + "%";
+
+                document.getElementById('sensorData').style.color = "#e2e8f0";
             }
         };
-    }
+     // 👇 (Auto-Reconnect Logic) 👇
+    ws.onclose = () => {
+        console.log("Connection lost. ESP32 is rebooting...");
+        let sensorDiv = document.getElementById('sensorData');
+        sensorDiv.innerText = "⚠️ Firmware Updated! Reconnecting in 8s...";
+        sensorDiv.style.color = "#ef4444"; // Red color for warning
+
+        // 8 seconds baad browser khud page refresh kar lega
+        setTimeout(() => {
+            location.reload();
+        }, 8000);
+    };
+}       
+
 
     function saveApiKey() {
         const key = document.getElementById('apiKeyInput').value.trim();
