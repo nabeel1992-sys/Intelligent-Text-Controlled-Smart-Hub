@@ -1,10 +1,10 @@
-# 🤖 Aura AI Smart Hub
+# 🤖 Intelligent Text Controlled Smart Hub
 
 ![Platform](https://img.shields.io/badge/Platform-ESP32--S3-blue)
 ![Framework](https://img.shields.io/badge/Framework-Arduino%20(PlatformIO)-orange)
 ![Features](https://img.shields.io/badge/Features-OTA%20%7C%20WebSockets%20%7C%20Gemini%20AI-success)
 
-Aura AI Smart Hub is a production-grade, full-stack Embedded IoT dashboard built on the **ESP32-S3** architecture. It features a real-time bidirectional web dashboard, live OLED hardware status, embedded Gemini AI, and a fully automated Over-The-Air (OTA) CI/CD deployment pipeline.
+Intelligent Text Controlled Smart Hub is a production-grade, full-stack Embedded IoT dashboard built on the **ESP32-S3** architecture. It features a real-time bidirectional web dashboard, live OLED hardware status, embedded Gemini AI, and a fully automated Over-The-Air (OTA) CI/CD deployment pipeline.
 
 ---
 
@@ -67,7 +67,7 @@ Build and upload the C++ code by clicking the Upload arrow at the bottom of VS C
 First Boot: The device will boot into AP mode. Connect your phone/PC to the Wi-Fi network named ESP32_Setup.
 Wi-Fi Config: Navigate to http://192.168.4.1 and enter your home Wi-Fi credentials. The device will reboot and connect to your home network.
 OLED Status: Check the physical OLED screen for the assigned local IP Address.
-Dashboard: Open the IP Address in your browser to access the Aura AI Hub.
+Dashboard: Open the IP Address in your browser to access the Intelligent Text Controlled Smart Hub.
 AI Setup: Paste your Gemini API Key in the setup box on the dashboard to activate the AI Assistant.
 
 --------------------------------------------------------------------------------
