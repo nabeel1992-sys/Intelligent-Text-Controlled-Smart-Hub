@@ -1,5 +1,6 @@
 #include "web_server.h"
 #include "wifi_config.h" // Included to access the apMode variable
+#include "oled_display.h"
 #include <Update.h>
 #include <SPIFFS.h>
 #include <Preferences.h>
@@ -86,12 +87,18 @@ void setupWebServer() {
     server.on("/update", HTTP_POST, []() {
         server.sendHeader("Connection", "close");
         server.send(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
+        if (Update.hasError()) {
+            showOLEDMessage("OTA UPDATE", "Update Failed!", "Rebooting...");
+        } else {
+            showOLEDMessage("OTA UPDATE", "Update Success!", "Rebooting...");
+        }
         blinkConfirm();
         ESP.restart();
     }, []() {
         HTTPUpload& upload = server.upload();
         if (upload.status == UPLOAD_FILE_START) {
             Serial.printf("Starting OTA: %s\n", upload.filename.c_str());
+            showOLEDMessage("OTA UPDATE", "Downloading code...", "Please wait ⏳");
             if (!Update.begin(UPDATE_SIZE_UNKNOWN)) {
                 Update.printError(Serial);
             }
@@ -102,6 +109,7 @@ void setupWebServer() {
         } else if (upload.status == UPLOAD_FILE_END) {
             if (Update.end(true)) {
                 Serial.printf("OTA done: %u bytes\n", upload.totalSize);
+                showOLEDMessage("OTA UPDATE", "Writing to Flash...", "Almost done");
             } else {
                 Update.printError(Serial);
             }
