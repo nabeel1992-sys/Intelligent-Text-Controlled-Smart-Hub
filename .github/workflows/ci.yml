@@ -8,7 +8,7 @@ jobs:
     # IMPORTANT: If your ESP32 is on a local home Wi-Fi (e.g., 192.168.1.x), 
     # GitHub's cloud servers cannot reach it directly. 
     # You should install a GitHub Runner on your own PC and change 'ubuntu-latest' to 'self-hosted'.
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     steps:
       # Step 1: Download your code from the GitHub repository
